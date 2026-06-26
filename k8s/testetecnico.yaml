@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: testetecnico
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: testetecnico-sqlite
+  namespace: testetecnico
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testetecnico
+  namespace: testetecnico
+  labels:
+    app: testetecnico
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testetecnico
+  template:
+    metadata:
+      labels:
+        app: testetecnico
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        runAsGroup: 1654
+        fsGroup: 1654
+      containers:
+        - name: testetecnico
+          image: testetecnico:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ConnectionStrings__DefaultConnection
+              value: Data Source=/app/data/testeTecnico.db
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: sqlite-data
+              mountPath: /app/data
+      volumes:
+        - name: sqlite-data
+          persistentVolumeClaim:
+            claimName: testetecnico-sqlite
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testetecnico
+  namespace: testetecnico
+spec:
+  type: LoadBalancer
+  selector:
+    app: testetecnico
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
