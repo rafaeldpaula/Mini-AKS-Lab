@@ -1,6 +1,6 @@
-# TesteTecnico
+# Mini-AKS-Lab
 
-`TesteTecnico` is a small .NET 9 Web API created to practice backend fundamentals and cloud deployment concepts using Azure Kubernetes Service (AKS).
+`Mini-AKS-Lab` is a small .NET 9 Web API created to practice backend fundamentals and cloud deployment concepts using Azure Kubernetes Service (AKS).
 
 The project starts from a simple task-management API and evolves it into a deployable application with Docker, Kubernetes manifests and Terraform infrastructure. The goal is not to build a complete production system yet, but to create a clean technical foundation that shows how an API can move from local development to a Kubernetes-based environment in Azure.
 
